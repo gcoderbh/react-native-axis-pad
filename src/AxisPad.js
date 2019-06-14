@@ -85,7 +85,15 @@ export default class AxisPad extends Component {
 
     sendValue(x, y) {
         const { width } = this.state;
-        this.props.onValue && this.props.onValue({ x: x / width * 2, y: y / width * 2 });
+        const value = { x: x / width * 2, y: y / width * 2 }
+        const direction = {
+            front: value.y < -(this.props.directionStep || 0.3),
+            back: value.y > (this.props.directionStep || 0.3),
+            left: value.x < -(this.props.directionStep || 0.3),
+            right: value.x > (this.props.directionStep || 0.3)
+        }
+        this.props.onDirection && this.props.onDirection(direction)
+        this.props.onValue && this.props.onValue(value);
     }
 
     centerPosition(pageX, pageY) {
@@ -114,6 +122,7 @@ export default class AxisPad extends Component {
     }
 
     getTouchPoint(touches, identifier) {
+
         let touchItem = null;
 
         touches.map((item) => {
@@ -129,14 +138,14 @@ export default class AxisPad extends Component {
 
         const identifier = evt.nativeEvent.identifier;
         const touchItem = this.getTouchPoint(evt.nativeEvent.touches, identifier);
-        console.log(evt.nativeEvent.touches, identifier, touchItem);
+        //    console.log(evt.nativeEvent.touches, identifier, touchItem);
 
         if (typeof identifier === "number" && touchItem) {
             const { pageX, pageY } = touchItem;
 
             if (this.props.autoCenter) {
-                this.centerPosition(pageX, pageY);
-                this.sendValue(this.state.px, this.state.py);
+                // this.centerPosition(pageX, pageY);
+                // this.sendValue(this.state.px, this.state.py);
                 this.setState({
                     identifier,
                     sx: pageX,
@@ -144,7 +153,7 @@ export default class AxisPad extends Component {
                 });
             } else {
                 this.setPosition(pageX, pageY, () => {
-                    this.sendValue(this.state.px, this.state.py);
+                    // this.sendValue(this.state.px, this.state.py);
                     this.animate();
                 })
             }
@@ -180,6 +189,7 @@ export default class AxisPad extends Component {
             dx = 0;
             dy = 0;
         }
+        this.props.onRelease && this.props.onRelease()
         this.sendValue(px, py);
         this.setState({
             cx: 0,
